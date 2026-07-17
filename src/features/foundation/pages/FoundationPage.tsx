@@ -15,6 +15,7 @@ import {
   Wifi
 } from 'lucide-react'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { StatusPill } from '../../../shared/components/StatusPill'
 import { readPublicEnvironment } from '../../../shared/config/env'
 import { useAppearance } from '../../../shared/hooks/useAppearance'
@@ -89,21 +90,39 @@ export function FoundationPage() {
             className="hidden items-center gap-1 lg:flex"
             aria-label="Product sections"
           >
-            {navigationItems.map((item) => (
-              <button
-                key={item}
-                type="button"
-                onClick={() => setActiveSection(item)}
-                className={`rounded-lg px-3 py-2 text-sm font-medium ${
-                  activeSection === item
-                    ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950'
-                    : 'text-slate-600 dark:text-slate-300'
-                }`}
-                aria-current={activeSection === item ? 'page' : undefined}
-              >
-                {item}
-              </button>
-            ))}
+            {navigationItems.map((item) =>
+              item === 'Accounts' ? (
+                <Link
+                  key={item}
+                  to="/accounts"
+                  className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300"
+                >
+                  {item}
+                </Link>
+              ) : item === 'Automation' ? (
+                <Link
+                  key={item}
+                  to="/automation"
+                  className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300"
+                >
+                  {item}
+                </Link>
+              ) : (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => setActiveSection(item)}
+                  className={`rounded-lg px-3 py-2 text-sm font-medium ${
+                    activeSection === item
+                      ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950'
+                      : 'text-slate-600 dark:text-slate-300'
+                  }`}
+                  aria-current={activeSection === item ? 'page' : undefined}
+                >
+                  {item}
+                </button>
+              )
+            )}
           </nav>
 
           <div className="flex items-center gap-2">
@@ -154,13 +173,19 @@ export function FoundationPage() {
               touched.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <a
-                href="#environment"
+              <Link
+                to="/accounts"
                 className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 dark:bg-slate-950 dark:text-white"
               >
-                Review setup
+                Login with Deriv
                 <ArrowRight className="size-4" aria-hidden="true" />
-              </a>
+              </Link>
+              <Link
+                to="/automation"
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-700 px-4 py-2.5 text-sm font-semibold text-white dark:border-slate-300 dark:text-slate-950"
+              >
+                Safety console
+              </Link>
               <span className="text-sm text-slate-400 dark:text-slate-500">
                 No live trading is available at this stage.
               </span>

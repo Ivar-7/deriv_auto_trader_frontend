@@ -10,5 +10,23 @@ export const router = createBrowserRouter([
       return { Component: FoundationPage }
     },
     errorElement: <RouteErrorPage />
+  },
+  {
+    path: '/accounts',
+    lazy: async () => {
+      const { AccountsPage } =
+        await import('../features/accounts/pages/AccountsPage')
+      return { Component: AccountsPage }
+    },
+    errorElement: <RouteErrorPage />
+  },
+  {
+    path: '/automation',
+    lazy: async () => {
+      const { SafetyConsolePage } =
+        await import('../features/automation/pages/SafetyConsolePage')
+      return { Component: SafetyConsolePage }
+    },
+    errorElement: <RouteErrorPage />
   }
 ])

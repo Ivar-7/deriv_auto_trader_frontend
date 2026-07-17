@@ -11,19 +11,19 @@
 
 ## Phase 1 — Deriv connectivity and account state
 
-- [ ] Implement Deriv OAuth/login redirect and callback without password collection.
-- [ ] Implement authorized-account discovery, multiple-account selection, demo/real badges, balance/currency refresh, disconnect, and logout.
-- [ ] Build a per-account connection manager with subscriptions, reconnection, expiry/restricted states, and five-minute retry policy.
-- [ ] Implement reconnect reconciliation: balances, open contracts, missed settlements, idempotent trade submission, and session restoration.
+- [x] Implement Deriv OAuth/login redirect and callback without password collection.
+- [x] Implement authorized-account discovery, multiple-account selection, demo/real badges, balance/currency refresh, disconnect, and logout.
+- [x] Build a per-account connection manager with subscriptions, reconnection, expiry/restricted states, and five-minute retry policy.
+- [x] Implement reconnect reconciliation: balances, open contracts, missed settlements, idempotent trade submission, and session restoration.
 
 ## Phase 2 — Core domain and safety layer
 
-- [ ] Implement account-bound session lifecycle and state machine.
-- [ ] Implement contract proposal/validation and Start-preview guard.
-- [ ] Implement open-contract tracking, Deriv-to-platform status mapping, and action availability checks.
-- [ ] Implement account automation-cycle P/L tracking.
-- [ ] Implement centralized account/bot risk-limit evaluation and Emergency Stop.
-- [ ] Implement structured, meaningful Activity Log events.
+- [x] Implement account-bound session lifecycle and state machine.
+- [x] Implement contract proposal/validation and Start-preview guard.
+- [x] Implement open-contract tracking, Deriv-to-platform status mapping, and action availability checks.
+- [x] Implement account automation-cycle P/L tracking.
+- [x] Implement centralized account/bot risk-limit evaluation and Emergency Stop.
+- [x] Implement structured, meaningful Activity Log events.
 
 ## Phase 3 — Market data and analytical primitives
 

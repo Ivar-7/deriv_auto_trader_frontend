@@ -1,10 +1,10 @@
 # Deriv Auto Trader Frontend
 
-The Phase Zero frontend uses React, Vite, TypeScript, React Router, and Tailwind CSS. The starter UI has been replaced with a responsive, accessible foundation workspace with light and dark appearance support.
+The Phase Zero through Two frontend uses React, Vite, TypeScript, React Router, and Tailwind CSS. It includes responsive account connectivity plus an account-bound safety console with proposal validation, risk limits, lifecycle controls, Emergency Stop, reconciled contract state, and activity events. Styling is Tailwind-only with light and dark appearance support.
 
 ## Setup
 
-Copy `.env.example` to `.env`. Set `VITE_API_URL` and the assigned `VITE_DERIV_APP_ID`. The UI validates public configuration and presents a safe setup state until those values are valid; it does not collect a Deriv password.
+Copy `.env.example` to `.env` and set `VITE_API_URL`. The backend owns Deriv OAuth configuration; the frontend starts the Deriv login handoff through the API and never collects a Deriv password.
 
 ## Commands
 
