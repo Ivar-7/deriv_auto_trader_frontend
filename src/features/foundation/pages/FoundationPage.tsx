@@ -28,6 +28,8 @@ const navigationItems = [
   'Markets',
   'Scanner',
   'Bulk',
+  'Copy',
+  'History',
   'Risk',
   'Activity'
 ] as const
@@ -138,6 +140,22 @@ export function FoundationPage() {
                 <Link
                   key={item}
                   to="/bulk"
+                  className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300"
+                >
+                  {item}
+                </Link>
+              ) : item === 'Copy' ? (
+                <Link
+                  key={item}
+                  to="/copy"
+                  className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300"
+                >
+                  {item}
+                </Link>
+              ) : item === 'History' ? (
+                <Link
+                  key={item}
+                  to="/history"
                   className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300"
                 >
                   {item}

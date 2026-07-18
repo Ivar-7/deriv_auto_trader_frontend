@@ -1,6 +1,9 @@
 import { apiRequest } from '../../../shared/api/httpClient'
 import { z } from 'zod'
-import type { AccountSession } from '../types/accounts.types'
+import type {
+  AccountSession,
+  RealAccountDisclosure
+} from '../types/accounts.types'
 
 const accountSessionSchema = z.object({
   accounts: z.array(
@@ -26,6 +29,13 @@ const accountSessionSchema = z.object({
 
 const authorizationUrlSchema = z.object({ authorizationUrl: z.string().url() })
 const logoutSchema = z.object({ loggedOut: z.boolean() })
+const disclosureSchema = z.object({
+  accountId: z.string(),
+  accountKind: z.enum(['demo', 'real']),
+  disclosureVersion: z.string(),
+  accepted: z.boolean(),
+  acceptedAt: z.string().datetime().nullable()
+})
 
 function parseAccountSession(data: unknown): AccountSession | null {
   const parsed = accountSessionSchema.safeParse(data)
@@ -77,5 +87,26 @@ export function logout(): Promise<{ loggedOut: boolean }> {
       return parsed.success ? parsed.data : null
     },
     { method: 'POST' }
+  )
+}
+
+export function getRealAccountDisclosure(): Promise<RealAccountDisclosure> {
+  return apiRequest('/api/v1/accounts/disclosure', (data) => {
+    const parsed = disclosureSchema.safeParse(data)
+    return parsed.success ? parsed.data : null
+  })
+}
+
+export function acceptRealAccountDisclosure(): Promise<RealAccountDisclosure> {
+  return apiRequest(
+    '/api/v1/accounts/disclosure/accept',
+    (data) => {
+      const parsed = disclosureSchema.safeParse(data)
+      return parsed.success ? parsed.data : null
+    },
+    {
+      method: 'POST',
+      body: JSON.stringify({ accepted: true })
+    }
   )
 }

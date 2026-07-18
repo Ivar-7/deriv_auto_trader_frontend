@@ -79,6 +79,48 @@ export async function apiRequest<TData>(
   return parsedData
 }
 
+export async function apiTextRequest(
+  path: string,
+  options: Readonly<RequestInit> = {}
+): Promise<string> {
+  const environment = readPublicEnvironment()
+
+  if (!environment.isValid) {
+    throw new ApiError(
+      'CONFIGURATION_REQUIRED',
+      'The application API URL is not configured.'
+    )
+  }
+
+  let response: Response
+
+  try {
+    response = await fetch(
+      new URL(path, environment.value.VITE_API_URL).toString(),
+      {
+        ...options,
+        credentials: 'include',
+        headers: { ...options.headers }
+      }
+    )
+  } catch {
+    throw new ApiError(
+      'API_UNAVAILABLE',
+      'The application service is unavailable. Try again shortly.'
+    )
+  }
+
+  if (!response.ok) {
+    const failure = asApiFailure(await readJson(response))
+    throw new ApiError(
+      failure?.error.code ?? 'REQUEST_FAILED',
+      failure?.error.message ?? 'The request could not be completed.'
+    )
+  }
+
+  return response.text()
+}
+
 async function readJson(response: Response): Promise<unknown> {
   try {
     return await response.json()

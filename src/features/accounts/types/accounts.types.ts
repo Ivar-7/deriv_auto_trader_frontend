@@ -22,3 +22,11 @@ export type AccountSession = Readonly<{
   selectedAccountId: string | null
   expiresAt: string
 }>
+
+export type RealAccountDisclosure = Readonly<{
+  accountId: string
+  accountKind: AccountKind
+  disclosureVersion: string
+  accepted: boolean
+  acceptedAt: string | null
+}>

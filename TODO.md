@@ -51,17 +51,17 @@
 
 ## Phase 6 — Copy trading and records
 
-- [ ] Implement authorized-account-only copy configuration and per-sub-account validation.
-- [ ] Copy only accepted master trades; support partial success, pause, stop, caps, and loss limits.
-- [ ] Build Open Trades and Trade History views with filters, details, and CSV export.
+- [x] Implement authorized-account-only copy configuration and per-sub-account validation.
+- [x] Copy only accepted master trades; support partial success, pause, stop, caps, and loss limits.
+- [x] Build Open Trades and Trade History views with filters, details, and CSV export.
 
 ## Phase 7 — Dashboard UX
 
-- [ ] Build landing page and legal/risk/FAQ content.
-- [ ] Build persistent authenticated layout, header, responsive navigation, account controls, and safe Reset behavior.
-- [ ] Build Dashboard, Bot Builder, Differs Bot, Analysis Tool, Charts, Risk Calculator, Copy Trading, Settings, Activity, History, and Aviator screens.
-- [ ] Add contextual help-only AI panel, sound/appearance preferences, and mobile layouts.
-- [ ] Gate first real-account automation session on disclosure acceptance.
+- [x] Build landing page and legal/risk/FAQ content.
+- [x] Build persistent authenticated layout, header, responsive navigation, account controls, and safe Reset behavior.
+- [x] Build Dashboard, Bot Builder, Differs Bot, Analysis Tool, Charts, Risk Calculator, Copy Trading, Settings, Activity, History, and Aviator screens.
+- [x] Add contextual help-only AI panel, sound/appearance preferences, and mobile layouts.
+- [x] Gate first real-account automation session on disclosure acceptance.
 
 ## Phase 8 — Verification and release readiness
 
