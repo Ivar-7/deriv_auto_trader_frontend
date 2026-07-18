@@ -28,5 +28,41 @@ export const router = createBrowserRouter([
       return { Component: SafetyConsolePage }
     },
     errorElement: <RouteErrorPage />
+  },
+  {
+    path: '/analysis',
+    lazy: async () => {
+      const { MarketAnalysisPage } =
+        await import('../features/analysis/pages/MarketAnalysisPage')
+      return { Component: MarketAnalysisPage }
+    },
+    errorElement: <RouteErrorPage />
+  },
+  {
+    path: '/bots',
+    lazy: async () => {
+      const { BotConsolePage } =
+        await import('../features/bots/pages/BotConsolePage')
+      return { Component: BotConsolePage }
+    },
+    errorElement: <RouteErrorPage />
+  },
+  {
+    path: '/scanner',
+    lazy: async () => {
+      const { DiffersScannerPage } =
+        await import('../features/scanner/pages/DiffersScannerPage')
+      return { Component: DiffersScannerPage }
+    },
+    errorElement: <RouteErrorPage />
+  },
+  {
+    path: '/bulk',
+    lazy: async () => {
+      const { BulkTraderPage } =
+        await import('../features/bulk/pages/BulkTraderPage')
+      return { Component: BulkTraderPage }
+    },
+    errorElement: <RouteErrorPage />
   }
 ])

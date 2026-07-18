@@ -27,27 +27,27 @@
 
 ## Phase 3 — Market data and analytical primitives
 
-- [ ] Add tick subscriptions, latency/data-state reporting, rolling movement/digit buffers, and digit board data.
-- [ ] Implement Rise/Fall confidence and digit observations with correct equal-to-barrier handling.
-- [ ] Implement theoretical-baseline and normalized-deviation utilities.
-- [ ] Add analysis/streak/market-scanner computations and unit tests.
+- [x] Add tick subscriptions, latency/data-state reporting, rolling movement/digit buffers, and digit board data.
+- [x] Implement Rise/Fall confidence and digit observations with correct equal-to-barrier handling.
+- [x] Implement theoretical-baseline and normalized-deviation utilities.
+- [x] Add analysis/streak/market-scanner computations and unit tests.
 
 ## Phase 4 — Single bot sessions
 
-- [ ] Implement reusable bot configuration, evaluation, submission, pause/resume/stop, settlement, and statistics engine.
-- [ ] Implement Rise/Fall bot UI/API.
-- [ ] Implement Over/Under bot UI/API.
-- [ ] Implement Even/Odd bot UI/API.
-- [ ] Implement Matches/Differs bot UI/API.
-- [ ] Implement martingale constraints, transitions, and stop behavior.
-- [ ] Implement Smart Auto Trader selection and No Signal transition logging.
+- [x] Implement reusable bot configuration, evaluation, submission, pause/resume/stop, settlement, and statistics engine.
+- [x] Implement Rise/Fall bot UI/API.
+- [x] Implement Over/Under bot UI/API.
+- [x] Implement Even/Odd bot UI/API.
+- [x] Implement Matches/Differs bot UI/API.
+- [x] Implement martingale constraints, transitions, and stop behavior.
+- [x] Implement Smart Auto Trader selection and No Signal transition logging.
 
 ## Phase 5 — Differs Scanner and bulk runs
 
-- [ ] Implement scanner market discovery, digit proposal/tie-break, normalized ranking, and filters.
-- [ ] Implement three-evaluation confirmation and qualifying execution guard.
-- [ ] Implement shared sequential bulk-run engine with active-contract limits and cancellation of only unsubmitted entries.
-- [ ] Wire Auto Bulk to accepted Smart/Scanner signals and Bulk Trader to manual starts.
+- [x] Implement scanner market discovery, digit proposal/tie-break, normalized ranking, and filters.
+- [x] Implement three-evaluation confirmation and qualifying execution guard.
+- [x] Implement shared sequential bulk-run engine with active-contract limits and cancellation of only unsubmitted entries.
+- [x] Wire Auto Bulk to accepted Smart/Scanner signals and Bulk Trader to manual starts.
 
 ## Phase 6 — Copy trading and records
 

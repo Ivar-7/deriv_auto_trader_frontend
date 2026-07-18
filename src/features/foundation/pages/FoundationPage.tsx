@@ -24,7 +24,10 @@ const navigationItems = [
   'Overview',
   'Accounts',
   'Automation',
+  'Bots',
   'Markets',
+  'Scanner',
+  'Bulk',
   'Risk',
   'Activity'
 ] as const
@@ -103,6 +106,38 @@ export function FoundationPage() {
                 <Link
                   key={item}
                   to="/automation"
+                  className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300"
+                >
+                  {item}
+                </Link>
+              ) : item === 'Markets' ? (
+                <Link
+                  key={item}
+                  to="/analysis"
+                  className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300"
+                >
+                  {item}
+                </Link>
+              ) : item === 'Bots' ? (
+                <Link
+                  key={item}
+                  to="/bots"
+                  className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300"
+                >
+                  {item}
+                </Link>
+              ) : item === 'Scanner' ? (
+                <Link
+                  key={item}
+                  to="/scanner"
+                  className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300"
+                >
+                  {item}
+                </Link>
+              ) : item === 'Bulk' ? (
+                <Link
+                  key={item}
+                  to="/bulk"
                   className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300"
                 >
                   {item}
@@ -186,9 +221,18 @@ export function FoundationPage() {
               >
                 Safety console
               </Link>
-              <span className="text-sm text-slate-400 dark:text-slate-500">
-                No live trading is available at this stage.
-              </span>
+              <Link
+                to="/analysis"
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-700 px-4 py-2.5 text-sm font-semibold text-white dark:border-slate-300 dark:text-slate-950"
+              >
+                Analyze markets
+              </Link>
+              <Link
+                to="/bots"
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-700 px-4 py-2.5 text-sm font-semibold text-white dark:border-slate-300 dark:text-slate-950"
+              >
+                Bot console
+              </Link>
             </div>
           </div>
 

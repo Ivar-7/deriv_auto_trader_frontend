@@ -1,6 +1,6 @@
 # Deriv Auto Trader Frontend
 
-The Phase Zero through Two frontend uses React, Vite, TypeScript, React Router, and Tailwind CSS. It includes responsive account connectivity plus an account-bound safety console with proposal validation, risk limits, lifecycle controls, Emergency Stop, reconciled contract state, and activity events. Styling is Tailwind-only with light and dark appearance support.
+The Phase Zero through Five frontend uses React, Vite, TypeScript, React Router, and Tailwind CSS. It includes responsive account connectivity, an account-bound safety console, market analysis, single-bot sessions, Differs Scanner, and Bulk Trader. The scanner surfaces observed digit deviations, its 3/3 confirmation guard, and safe Auto Bulk availability; Bulk Trader supports fixed-stake manual runs and Smart Auto Bulk profiles. Styling is Tailwind-only with light and dark appearance support.
 
 ## Setup
 

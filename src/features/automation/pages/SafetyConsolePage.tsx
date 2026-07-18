@@ -173,6 +173,12 @@ export function SafetyConsolePage() {
               <WalletCards className="size-4" aria-hidden="true" />
               Change account
             </Link>
+            <Link
+              to="/analysis"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-700 px-4 py-2.5 text-sm font-semibold text-white dark:border-slate-300 dark:text-slate-950"
+            >
+              Market analysis
+            </Link>
           </div>
         </section>
 
