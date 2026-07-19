@@ -34,7 +34,7 @@ export type MarketConsoleState =
     }>
   | Readonly<{
       status: 'success'
-      accountSession: AccountSession
+      accountSession: AccountSession | null
       data: MarketConsoleData
       message: null
     }>
@@ -64,32 +64,25 @@ export function useMarketAnalysis() {
   >([])
 
   useEffect(() => {
+    const loadSymbols = () => {
+      void getActiveSymbols()
+        .then(setAvailableMarkets)
+        .catch((error: unknown) => {
+          setActionMessage(
+            safeMessage(error, 'Unable to load Deriv active symbols.')
+          )
+        })
+    }
+
     void getAccountSession()
       .then((accountSession) => {
-        if (accountSession.selectedAccountId === null) {
-          setState({
-            status: 'empty',
-            accountSession,
-            data: null,
-            message:
-              'Select an authorized account before connecting a market feed.'
-          })
-          return
-        }
-
         setState({
           status: 'empty',
           accountSession,
           data: null,
           message: 'Choose a market to begin a read-only tick subscription.'
         })
-        void getActiveSymbols()
-          .then(setAvailableMarkets)
-          .catch((error: unknown) => {
-            setActionMessage(
-              safeMessage(error, 'Unable to load Deriv active symbols.')
-            )
-          })
+        loadSymbols()
       })
       .catch((error: unknown) => {
         if (
@@ -101,8 +94,9 @@ export function useMarketAnalysis() {
             status: 'empty',
             accountSession: null,
             data: null,
-            message: 'Connect a Deriv account before opening market analysis.'
+            message: 'Choose a market to begin a read-only tick subscription.'
           })
+          loadSymbols()
           return
         }
 
@@ -118,13 +112,6 @@ export function useMarketAnalysis() {
   const startMarket = useCallback(
     async (market: string, parameters: AnalysisParameters) => {
       const accountSession = state.accountSession
-
-      if (
-        accountSession === null ||
-        accountSession.selectedAccountId === null
-      ) {
-        return
-      }
 
       setIsWorking(true)
       setActionMessage(null)
@@ -143,7 +130,7 @@ export function useMarketAnalysis() {
           accountSession,
           data: {
             accountSession,
-            selectedAccountId: accountSession.selectedAccountId,
+            selectedAccountId: accountSession?.selectedAccountId ?? null,
             analysis,
             scanner: []
           },
@@ -238,24 +225,18 @@ export function useMarketAnalysis() {
 
   const replay = useCallback(
     async (market: string, ticks: readonly ReplayTickInput[]) => {
-      if (state.accountSession?.selectedAccountId === null) return
       setIsWorking(true)
       setActionMessage(null)
       try {
         await unsubscribeFromMarket(market)
         const analysis = await replayMarket(market, ticks)
         const accountSession = state.accountSession
-        if (
-          accountSession === null ||
-          accountSession.selectedAccountId === null
-        )
-          return
         setState({
           status: 'success',
           accountSession,
           data: {
             accountSession,
-            selectedAccountId: accountSession.selectedAccountId,
+            selectedAccountId: accountSession?.selectedAccountId ?? null,
             analysis,
             scanner: []
           },

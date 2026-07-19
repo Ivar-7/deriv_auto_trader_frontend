@@ -158,25 +158,15 @@ export function MarketAnalysisPage() {
             <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
               {state.message}
             </p>
-            {state.accountSession?.selectedAccountId === null ||
-            state.accountSession === null ? (
-              <Link
-                to="/accounts"
-                className="mt-6 inline-block rounded-lg bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white dark:bg-white dark:text-slate-950"
-              >
-                Select account
-              </Link>
-            ) : (
-              <MarketForm
-                market={market}
-                availableMarkets={availableMarkets}
-                parameters={parameters}
-                isWorking={isWorking}
-                onMarket={setMarket}
-                onParameters={setParameters}
-                onSubmit={connect}
-              />
-            )}
+            <MarketForm
+              market={market}
+              availableMarkets={availableMarkets}
+              parameters={parameters}
+              isWorking={isWorking}
+              onMarket={setMarket}
+              onParameters={setParameters}
+              onSubmit={connect}
+            />
           </div>
           <Safeguards />
         </section>

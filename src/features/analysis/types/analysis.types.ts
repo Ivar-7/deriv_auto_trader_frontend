@@ -174,8 +174,8 @@ type StreakSummary = Readonly<{
 }>
 
 export type MarketConsoleData = Readonly<{
-  accountSession: AccountSession
-  selectedAccountId: string
+  accountSession: AccountSession | null
+  selectedAccountId: string | null
   analysis: MarketAnalysis
   scanner: readonly MarketScannerObservation[]
 }>
