@@ -4,7 +4,7 @@ The Phase Zero through Seven frontend uses React, Vite, TypeScript, React Router
 
 ## Setup
 
-Copy `.env.example` to `.env` and set `VITE_API_URL`. The backend owns Deriv OAuth configuration; the frontend starts the Deriv login handoff through the API and never collects a Deriv password.
+Copy `.env.example` to `.env` and set `VITE_API_URL`. In Vercel, set it to `https://deriv-auto-trader-frontend.vercel.app` and use the project’s `/api` rewrite to forward requests to the backend. This keeps the browser session cookie same-origin. The backend owns Deriv OAuth configuration; the frontend starts the Deriv login handoff through the API and never collects a Deriv password.
 
 ## Commands
 
