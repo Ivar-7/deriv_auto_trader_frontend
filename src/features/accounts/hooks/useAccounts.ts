@@ -88,12 +88,31 @@ export function useAccounts() {
     }
   }, [])
 
+  useEffect(() => {
+    const synchronizeAccountSession = () => {
+      void load()
+    }
+
+    window.addEventListener(
+      'deriv-account-session-changed',
+      synchronizeAccountSession
+    )
+
+    return () => {
+      window.removeEventListener(
+        'deriv-account-session-changed',
+        synchronizeAccountSession
+      )
+    }
+  }, [load])
+
   const run = useCallback(async (operation: () => Promise<AccountSession>) => {
     setIsWorking(true)
 
     try {
       const session = await operation()
       setState({ status: 'success', session, message: null })
+      window.dispatchEvent(new Event('deriv-account-session-changed'))
     } catch (error: unknown) {
       setState({
         status: 'error',
@@ -123,6 +142,7 @@ export function useAccounts() {
     try {
       await logout()
       setState({ status: 'empty', session: null, message: null })
+      window.dispatchEvent(new Event('deriv-account-session-changed'))
     } catch (error: unknown) {
       setState({
         status: 'error',
