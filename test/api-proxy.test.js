@@ -38,6 +38,25 @@ describe('Vercel API proxy', () => {
     expect(fetchMock).toHaveBeenCalledOnce()
   })
 
+  it('retries the safe login handoff after a transient transport failure', async () => {
+    const success = new Response(
+      JSON.stringify({ data: { authorizationUrl: 'https://auth.example/' } })
+    )
+    const fetchMock = vi
+      .fn()
+      .mockRejectedValueOnce(new TypeError('temporary connection failure'))
+      .mockResolvedValueOnce(success)
+    vi.stubGlobal('fetch', fetchMock)
+
+    const response = await forwardRequest(
+      new URL('https://backend.example/api/v1/auth/deriv/login'),
+      { method: 'POST', headers: new Headers(), body: undefined }
+    )
+
+    expect(response).toBe(success)
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+
   it('continues retrying ordinary read-only API requests', () => {
     expect(
       isRetrySafeRequest(
@@ -54,6 +73,18 @@ describe('Vercel API proxy', () => {
     expect(
       isRetrySafeRequest(
         new URL('https://backend.example/api/v1/auth/deriv/login'),
+        'POST'
+      )
+    ).toBe(true)
+    expect(
+      isRetrySafeRequest(
+        new URL('https://backend.example/api/v1/markets/subscribe'),
+        'POST'
+      )
+    ).toBe(true)
+    expect(
+      isRetrySafeRequest(
+        new URL('https://backend.example/api/v1/bots/start'),
         'POST'
       )
     ).toBe(false)

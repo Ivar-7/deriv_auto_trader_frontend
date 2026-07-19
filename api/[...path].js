@@ -2,7 +2,9 @@ const backendOrigin =
   process.env.BACKEND_API_ORIGIN ??
   'https://deriv-auto-trader-api-h44p4.ondigitalocean.app'
 const retryableStatuses = new Set([502, 503, 504, 522])
-const requestTimeoutMilliseconds = 15_000
+const readRequestTimeoutMilliseconds = 8_000
+const writeRequestTimeoutMilliseconds = 15_000
+const oauthCallbackTimeoutMilliseconds = 20_000
 
 export const config = { maxDuration: 30 }
 
@@ -64,14 +66,15 @@ function catchAllPath(value) {
 }
 
 async function forwardRequest(target, init) {
-  const attempts = isRetrySafeRequest(target, init.method) ? 3 : 1
+  const attempts = isRetrySafeRequest(target, init.method) ? 2 : 1
+  const timeoutMilliseconds = requestTimeout(target, init.method)
 
   for (let attempt = 0; attempt < attempts; attempt += 1) {
     try {
       const controller = new AbortController()
       const timeout = setTimeout(
         () => controller.abort(),
-        requestTimeoutMilliseconds
+        timeoutMilliseconds
       )
 
       try {
@@ -93,7 +96,15 @@ async function forwardRequest(target, init) {
       } finally {
         clearTimeout(timeout)
       }
-    } catch {
+    } catch (error) {
+      console.warn('API proxy upstream request failed', {
+        method: init.method,
+        path: target.pathname,
+        attempt: attempt + 1,
+        attempts,
+        error: error instanceof Error ? error.name : 'UnknownError'
+      })
+
       if (attempt === attempts - 1) {
         return null
       }
@@ -104,11 +115,30 @@ async function forwardRequest(target, init) {
 }
 
 function isRetrySafeRequest(target, method) {
-  if (!['GET', 'HEAD'].includes(method)) return false
-
   // The authorization code and state are single-use. Replaying this GET after
   // the backend consumes them turns a successful callback into an expired one.
-  return target.pathname !== '/api/v1/auth/deriv/callback'
+  if (target.pathname === '/api/v1/auth/deriv/callback') return false
+
+  if (['GET', 'HEAD'].includes(method)) return true
+
+  // These POST routes only create an OAuth attempt or replace/read a market
+  // subscription. Repeating them after a lost transport response is safe and
+  // prevents a transient Vercel-to-backend connection from surfacing to users.
+  return (
+    method === 'POST' &&
+    (target.pathname === '/api/v1/auth/deriv/login' ||
+      target.pathname.endsWith('/subscribe'))
+  )
+}
+
+function requestTimeout(target, method) {
+  if (target.pathname === '/api/v1/auth/deriv/callback') {
+    return oauthCallbackTimeoutMilliseconds
+  }
+
+  return ['GET', 'HEAD'].includes(method)
+    ? readRequestTimeoutMilliseconds
+    : writeRequestTimeoutMilliseconds
 }
 
 function requestHeaders(headers) {

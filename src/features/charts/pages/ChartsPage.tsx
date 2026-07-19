@@ -62,6 +62,9 @@ export function ChartsPage() {
     useState<ChartPreferences>(readChartPreferences)
   const autoConnectRequested = useRef(false)
   const { chartMode, market, timeframe } = preferences
+  const hasSelectedAccount =
+    state.accountSession?.selectedAccountId !== null &&
+    state.accountSession?.selectedAccountId !== undefined
 
   useEffect(() => {
     window.localStorage.setItem(
@@ -218,15 +221,23 @@ export function ChartsPage() {
       {state.status === 'empty' ? (
         <StateCard
           icon={<WalletCards className="size-7" aria-hidden="true" />}
-          title="An account connection is required"
+          title={
+            hasSelectedAccount
+              ? isWorking
+                ? 'Connecting the saved market feed'
+                : 'The chart feed is disconnected'
+              : 'An account connection is required'
+          }
           message={state.message}
           action={
+            hasSelectedAccount ? null : (
             <Link
               to="/accounts"
               className="mt-5 inline-flex rounded-xl bg-sky-400 px-4 py-2.5 text-sm font-extrabold text-slate-950 transition hover:bg-sky-300"
             >
               Open accounts
             </Link>
+            )
           }
         />
       ) : null}
