@@ -30,7 +30,7 @@ export function DashboardPage() {
       : null
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+    <main className="w-full px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
       <section className="grid gap-5 xl:grid-cols-5">
         <div className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-2xl shadow-slate-950/20 sm:p-8 xl:col-span-3">
           <div

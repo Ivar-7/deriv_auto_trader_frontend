@@ -86,7 +86,7 @@ export function AccountsPage() {
       : null
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+    <main className="w-full px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
       <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-2xl shadow-slate-950/20 sm:p-8">
         <div
           className="absolute -top-20 -right-12 size-56 rounded-full bg-sky-400/10 blur-3xl"

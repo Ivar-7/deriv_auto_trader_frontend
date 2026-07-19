@@ -102,7 +102,7 @@ export function BulkTraderPage() {
   }
   return (
     <div className="min-h-screen bg-slate-50 text-slate-950 dark:bg-slate-950 dark:text-slate-50">
-      <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
+      <header className="hidden border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
           <Link
             to="/"
@@ -137,7 +137,7 @@ export function BulkTraderPage() {
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+      <main className="w-full px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
         <section className="rounded-3xl bg-slate-950 p-6 text-white sm:p-8 dark:bg-white dark:text-slate-950">
           <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
             <div>

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 
 export function AviatorPage() {
   return (
-    <main className="mx-auto flex min-h-screen max-w-4xl items-center px-4 py-8 sm:px-6 lg:px-8">
+    <main className="flex min-h-screen w-full items-center px-4 py-8 sm:px-6 lg:px-8">
       <section className="w-full rounded-3xl border border-amber-200 bg-amber-50 p-8 text-center sm:p-12 dark:border-amber-900 dark:bg-amber-950">
         <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-100">
           <Plane className="size-7" aria-hidden="true" />

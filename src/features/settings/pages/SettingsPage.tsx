@@ -18,7 +18,7 @@ export function SettingsPage() {
   const { isSoundEnabled, setIsSoundEnabled } = useSoundPreference()
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+    <main className="w-full px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
       <section className="rounded-3xl bg-slate-950 p-6 text-white sm:p-8 dark:bg-white dark:text-slate-950">
         <p className="flex items-center gap-2 text-sm font-bold text-emerald-300 dark:text-emerald-700">
           <SlidersHorizontal className="size-4" aria-hidden="true" /> Workspace

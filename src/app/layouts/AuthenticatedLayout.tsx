@@ -165,7 +165,7 @@ export function AuthenticatedLayout() {
   return (
     <div className="min-h-screen bg-slate-100 text-slate-950 dark:bg-slate-950 dark:text-slate-100">
       <header className="sticky top-0 z-30 border-b border-slate-800 bg-slate-950/95 text-slate-100 shadow-xl shadow-slate-950/20 backdrop-blur">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex min-h-18 items-center justify-between gap-4 py-3">
             <NavLink
               to="/dashboard"
@@ -328,7 +328,7 @@ export function AuthenticatedLayout() {
       {selectedAccount?.kind === 'real' &&
       currentDisclosure?.accepted === false ? (
         <div className="border-b border-amber-500/30 bg-amber-500/10">
-          <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+          <div className="flex w-full flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
             <p className="text-sm text-amber-800 dark:text-amber-200">
               Real-account automation is locked until you review the risk
               disclosure for {selectedAccount.displayName}.
