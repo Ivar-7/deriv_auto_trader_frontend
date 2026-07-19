@@ -21,6 +21,20 @@ export type MarketTick = Readonly<{
   receivedAt: string
 }>
 
+export type MarketCandle = Readonly<{
+  epoch: number
+  open: string
+  high: string
+  low: string
+  close: string
+}>
+
+export type MarketCandleHistory = Readonly<{
+  oneMinute: readonly MarketCandle[]
+  fiveMinutes: readonly MarketCandle[]
+  oneHour: readonly MarketCandle[]
+}>
+
 export type MarketDataHealth = Readonly<{
   state: MarketDataState
   lastTickAt: string | null
@@ -41,6 +55,7 @@ export type MarketAnalysis = Readonly<{
   health: MarketDataHealth
   latestTick: MarketTick | null
   recentTicks: readonly MarketTick[]
+  candles: MarketCandleHistory
   movement: Readonly<{
     rising: number
     falling: number

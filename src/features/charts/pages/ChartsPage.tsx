@@ -17,42 +17,28 @@ import {
 } from 'react'
 import { Link } from 'react-router-dom'
 import { useMarketAnalysis } from '../../analysis/hooks/useMarketAnalysis'
-import type { MarketTick } from '../../analysis/types/analysis.types'
+import type { MarketCandleHistory } from '../../analysis/types/analysis.types'
+import { MarketChart, type ChartMode } from '../components/MarketChart'
+import { chartTimeframes, type ChartTimeframe } from '../lib/chart-data'
 
-const timeframes = ['1 tick', '1 minute', '5 minutes', '1 hour'] as const
 const chartPreferencesKey = 'deriv-auto-trader:chart-preferences'
 const analysisParameters = {
   movementWindow: 30,
-  digitWindow: 200,
+  digitWindow: 500,
   barrier: 5,
   confidenceThreshold: 0.6
 }
 
-type ChartMode = 'ticks' | 'candles'
-type Timeframe = (typeof timeframes)[number]
 type ChartPreferences = Readonly<{
   market: string
   chartMode: ChartMode
-  timeframe: Timeframe
-}>
-type Candle = Readonly<{
-  open: number
-  high: number
-  low: number
-  close: number
+  timeframe: ChartTimeframe
 }>
 
 const defaultChartPreferences: ChartPreferences = {
   market: 'R_100',
-  chartMode: 'ticks',
-  timeframe: '1 tick'
-}
-
-const candleGroupSize: Record<Timeframe, number> = {
-  '1 tick': 1,
-  '1 minute': 2,
-  '5 minutes': 4,
-  '1 hour': 5
+  chartMode: 'candles',
+  timeframe: '1 minute'
 }
 
 export function ChartsPage() {
@@ -84,9 +70,7 @@ export function ChartsPage() {
 
     const selectedMarket = market.trim().toUpperCase()
 
-    if (selectedMarket.length === 0) {
-      return
-    }
+    if (selectedMarket.length === 0) return
 
     autoConnectRequested.current = true
     void startMarket(selectedMarket, analysisParameters)
@@ -96,9 +80,7 @@ export function ChartsPage() {
     event.preventDefault()
     const selectedMarket = market.trim().toUpperCase()
 
-    if (selectedMarket.length === 0) {
-      return
-    }
+    if (selectedMarket.length === 0) return
 
     setPreferences((current) => ({ ...current, market: selectedMarket }))
     void startMarket(selectedMarket, analysisParameters)
@@ -114,100 +96,34 @@ export function ChartsPage() {
   }
 
   return (
-    <main className="w-full px-5 py-7 sm:px-8 lg:px-10 lg:py-9">
-      <section className="rounded-3xl border border-slate-800 bg-slate-900 px-6 py-7 shadow-2xl shadow-slate-950/20 sm:px-8">
-        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+    <main className="w-full px-3 py-4 sm:px-5 lg:px-6">
+      <header className="flex flex-col gap-3 rounded-2xl border border-slate-800 bg-slate-900 px-4 py-3.5 shadow-xl shadow-slate-950/20 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+        <div className="flex items-center gap-3">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-sky-400/10 text-sky-400">
+            <ChartNoAxesCombined className="size-5" aria-hidden="true" />
+          </div>
           <div>
-            <p className="flex items-center gap-2 text-sm font-bold text-sky-400">
-              <ChartNoAxesCombined className="size-4" aria-hidden="true" />
-              Live market workspace
-            </p>
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-              Watch observed market movement at a useful scale.
-            </h1>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400">
-              Your market, chart view, and timeframe are remembered. The feed
-              reconnects automatically when this workspace opens.
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg font-bold tracking-tight text-white sm:text-xl">
+                Live market chart
+              </h1>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400/10 px-2 py-1 text-[10px] font-extrabold tracking-wide text-emerald-400 uppercase">
+                <span className="size-1.5 rounded-full bg-emerald-400" /> Live
+              </span>
+            </div>
+            <p className="mt-0.5 text-xs text-slate-400">
+              Historical Deriv OHLC with live price updates
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => void fullscreen()}
-            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-950 px-4 py-2.5 text-sm font-bold text-slate-100 transition hover:border-sky-400 hover:text-white"
-          >
-            <Expand className="size-4" aria-hidden="true" /> Full screen
-          </button>
         </div>
-      </section>
-
-      <section className="mt-5 rounded-3xl border border-slate-800 bg-slate-900 p-5 sm:p-6">
-        <form
-          onSubmit={submit}
-          className="grid gap-4 xl:grid-cols-4 xl:items-end"
+        <button
+          type="button"
+          onClick={() => void fullscreen()}
+          className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs font-bold text-slate-200 transition hover:border-sky-400 hover:text-white"
         >
-          <label className="block text-sm font-semibold text-slate-200">
-            Market
-            <input
-              value={market}
-              onChange={(event) =>
-                setPreferences((current) => ({
-                  ...current,
-                  market: event.target.value
-                }))
-              }
-              className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-3 text-sm font-semibold text-white transition outline-none placeholder:text-slate-600 focus:border-sky-400"
-              aria-label="Market"
-            />
-          </label>
-          <label className="block text-sm font-semibold text-slate-200">
-            Chart view
-            <select
-              value={chartMode}
-              onChange={(event) =>
-                setPreferences((current) => ({
-                  ...current,
-                  chartMode: event.target.value as ChartMode
-                }))
-              }
-              className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-3 text-sm font-semibold text-white transition outline-none focus:border-sky-400"
-              aria-label="Chart view"
-            >
-              <option value="ticks">Tick line</option>
-              <option value="candles">Candlesticks</option>
-            </select>
-          </label>
-          <label className="block text-sm font-semibold text-slate-200">
-            Timeframe
-            <select
-              value={timeframe}
-              onChange={(event) =>
-                setPreferences((current) => ({
-                  ...current,
-                  timeframe: event.target.value as Timeframe
-                }))
-              }
-              className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-3 text-sm font-semibold text-white transition outline-none focus:border-sky-400"
-              aria-label="Chart timeframe"
-            >
-              {timeframes.map((option) => (
-                <option key={option}>{option}</option>
-              ))}
-            </select>
-          </label>
-          <button
-            disabled={isWorking}
-            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-sky-400 px-5 py-3 text-sm font-extrabold text-slate-950 transition hover:bg-sky-300 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <Radio className="size-4" aria-hidden="true" />
-            {isWorking ? 'Connecting…' : 'Reconnect feed'}
-          </button>
-        </form>
-        {actionMessage === null ? null : (
-          <p className="mt-4 rounded-xl border border-rose-900/80 bg-rose-950/50 px-4 py-3 text-sm text-rose-200">
-            {actionMessage}
-          </p>
-        )}
-      </section>
+          <Expand className="size-3.5" aria-hidden="true" /> Full screen
+        </button>
+      </header>
 
       {state.status === 'loading' ? (
         <StateCard
@@ -215,7 +131,7 @@ export function ChartsPage() {
             <LoaderCircle className="size-7 animate-spin" aria-hidden="true" />
           }
           title="Restoring chart access"
-          message="Loading the selected account and its saved chart workspace."
+          message="Loading the selected account and chart workspace."
         />
       ) : null}
       {state.status === 'empty' ? (
@@ -224,19 +140,19 @@ export function ChartsPage() {
           title={
             hasSelectedAccount
               ? isWorking
-                ? 'Connecting the saved market feed'
+                ? 'Connecting the market feed'
                 : 'The chart feed is disconnected'
               : 'An account connection is required'
           }
           message={state.message}
           action={
             hasSelectedAccount ? null : (
-            <Link
-              to="/accounts"
-              className="mt-5 inline-flex rounded-xl bg-sky-400 px-4 py-2.5 text-sm font-extrabold text-slate-950 transition hover:bg-sky-300"
-            >
-              Open accounts
-            </Link>
+              <Link
+                to="/accounts"
+                className="mt-5 inline-flex rounded-xl bg-sky-400 px-4 py-2.5 text-sm font-extrabold text-slate-950 transition hover:bg-sky-300"
+              >
+                Open accounts
+              </Link>
             )
           }
         />
@@ -251,50 +167,152 @@ export function ChartsPage() {
           danger
         />
       ) : null}
+
       {state.status === 'success' ? (
-        <section className="mt-5 grid gap-5 2xl:grid-cols-5">
-          <article className="overflow-hidden rounded-3xl border border-slate-800 bg-slate-900 2xl:col-span-4">
-            <div className="flex flex-col gap-4 border-b border-slate-800 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <section className="mt-4 grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_17rem]">
+          <article className="min-w-0 overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-xl shadow-slate-950/20">
+            <form
+              onSubmit={submit}
+              className="flex flex-wrap items-end gap-3 border-b border-slate-800 px-3 py-3 sm:px-4"
+            >
+              <label className="block w-36 text-[11px] font-bold tracking-wide text-slate-500 uppercase">
+                Market
+                <input
+                  value={market}
+                  onChange={(event) =>
+                    setPreferences((current) => ({
+                      ...current,
+                      market: event.target.value
+                    }))
+                  }
+                  className="mt-1.5 h-10 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 font-mono text-sm font-bold text-white transition outline-none focus:border-sky-400"
+                  aria-label="Market"
+                />
+              </label>
+
               <div>
-                <p className="text-sm font-bold text-sky-400">
-                  {chartMode === 'ticks' ? 'Tick line' : 'Candlesticks'} ·{' '}
-                  {timeframe}
+                <p className="text-[11px] font-bold tracking-wide text-slate-500 uppercase">
+                  Chart
                 </p>
-                <h2 className="mt-1 text-2xl font-semibold text-white">
+                <div className="mt-1.5 flex h-10 overflow-hidden rounded-lg border border-slate-700 bg-slate-950 p-1">
+                  <ChartModeButton
+                    active={chartMode === 'candles'}
+                    label="Candles"
+                    onClick={() =>
+                      setPreferences((current) => ({
+                        ...current,
+                        chartMode: 'candles'
+                      }))
+                    }
+                  />
+                  <ChartModeButton
+                    active={chartMode === 'ticks'}
+                    label="Line"
+                    onClick={() =>
+                      setPreferences((current) => ({
+                        ...current,
+                        chartMode: 'ticks'
+                      }))
+                    }
+                  />
+                </div>
+              </div>
+
+              <label className="block w-40 text-[11px] font-bold tracking-wide text-slate-500 uppercase">
+                Interval
+                <select
+                  value={timeframe}
+                  onChange={(event) =>
+                    setPreferences((current) => ({
+                      ...current,
+                      timeframe: event.target.value as ChartTimeframe
+                    }))
+                  }
+                  className="mt-1.5 h-10 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm font-bold text-white transition outline-none focus:border-sky-400"
+                  aria-label="Chart interval"
+                >
+                  {chartTimeframes.map((option) => (
+                    <option key={option}>{option}</option>
+                  ))}
+                </select>
+              </label>
+
+              <div className="ml-auto flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => void refresh(analysisParameters)}
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-700 bg-slate-950 px-3 text-xs font-bold text-slate-200 transition hover:border-sky-400 hover:text-white"
+                >
+                  <RefreshCw className="size-3.5" aria-hidden="true" /> Refresh
+                </button>
+                <button
+                  disabled={isWorking}
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-sky-400 px-4 text-xs font-extrabold text-slate-950 transition hover:bg-sky-300 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <Radio className="size-3.5" aria-hidden="true" />
+                  {isWorking ? 'Connecting...' : 'Reconnect'}
+                </button>
+              </div>
+            </form>
+
+            {actionMessage === null ? null : (
+              <p className="mx-4 mt-3 rounded-lg border border-rose-900/80 bg-rose-950/50 px-3 py-2 text-xs text-rose-200">
+                {actionMessage}
+              </p>
+            )}
+
+            <div className="flex items-center justify-between px-4 py-3">
+              <div>
+                <h2 className="font-mono text-lg font-extrabold text-white">
                   {state.data.analysis.market}
                 </h2>
+                <p className="mt-0.5 text-[11px] font-semibold text-slate-500">
+                  {chartMode === 'candles' ? 'Candlestick' : 'Price line'} ·{' '}
+                  {timeframe}
+                </p>
               </div>
-              <button
-                type="button"
-                onClick={() => void refresh(analysisParameters)}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-xs font-bold text-slate-200 transition hover:border-sky-400 hover:text-white"
-              >
-                <RefreshCw className="size-3.5" aria-hidden="true" /> Refresh
-              </button>
+              <div className="text-right">
+                <p className="text-[10px] font-bold tracking-wider text-slate-500 uppercase">
+                  Bars loaded
+                </p>
+                <p className="mt-0.5 font-mono text-sm font-bold text-slate-200">
+                  {barCount(
+                    state.data.analysis.candles,
+                    state.data.analysis.recentTicks.length,
+                    timeframe
+                  )}
+                </p>
+              </div>
             </div>
-            <div className="px-3 py-3 sm:px-5 sm:py-5">
+
+            <div className="px-2 pb-2 sm:px-3 sm:pb-3">
               <MarketChart
+                candleHistory={state.data.analysis.candles}
                 chartMode={chartMode}
+                market={state.data.analysis.market}
                 ticks={state.data.analysis.recentTicks}
                 timeframe={timeframe}
               />
             </div>
-            <p className="border-t border-slate-800 px-5 py-4 text-xs leading-5 text-slate-400 sm:px-6">
-              {chartMode === 'candles'
-                ? 'Each candle aggregates the currently available observed ticks for the selected display interval. It is a live visual summary, not a forecast.'
-                : 'The line shows the recent observed quote sequence from the live feed. It is for inspection only, not a forecast.'}
+            <p className="border-t border-slate-800 px-4 py-3 text-[11px] leading-5 text-slate-500">
+              Drag the pointer across the plot to inspect time and OHLC values.
+              Time-based bars come from Deriv historical market data and the
+              current bar updates from the live feed.
             </p>
           </article>
 
-          <aside className="rounded-3xl border border-slate-800 bg-slate-900 p-5 sm:p-6">
-            <p className="text-sm font-bold text-slate-400">Current price</p>
-            <p className="mt-2 text-4xl font-semibold tracking-tight text-white">
+          <aside className="rounded-2xl border border-slate-800 bg-slate-900 p-4 shadow-xl shadow-slate-950/20">
+            <p className="text-[11px] font-bold tracking-wider text-slate-500 uppercase">
+              Current price
+            </p>
+            <p className="mt-2 font-mono text-3xl font-bold tracking-tight break-all text-white">
               {state.data.analysis.latestTick?.quote ?? '—'}
             </p>
-            <div className="mt-7 space-y-5 border-t border-slate-800 pt-5 text-sm">
+            <div className="mt-5 space-y-4 border-t border-slate-800 pt-4 text-sm">
               <Metric
                 label="Feed state"
                 value={state.data.analysis.health.state}
+                live={state.data.analysis.health.state === 'live'}
               />
               <Metric
                 label="Latency"
@@ -305,13 +323,14 @@ export function ChartsPage() {
                 }
               />
               <Metric label="Market" value={state.data.analysis.market} />
+              <Metric label="Source" value="Deriv public feed" />
             </div>
-            <div className="mt-7 flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-950 px-3 py-3 text-xs font-semibold text-slate-300">
+            <div className="mt-5 flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2.5 text-[11px] font-semibold text-slate-300">
               <TableProperties
-                className="size-4 text-sky-400"
+                className="size-3.5 text-sky-400"
                 aria-hidden="true"
               />
-              {state.data.analysis.recentTicks.length} live observations
+              {state.data.analysis.recentTicks.length} recent ticks
             </div>
           </aside>
         </section>
@@ -320,207 +339,66 @@ export function ChartsPage() {
   )
 }
 
-function MarketChart({
-  chartMode,
-  ticks,
-  timeframe
+function ChartModeButton({
+  active,
+  label,
+  onClick
 }: Readonly<{
-  chartMode: ChartMode
-  ticks: readonly MarketTick[]
-  timeframe: Timeframe
+  active: boolean
+  label: string
+  onClick: () => void
 }>) {
-  const values = ticks
-    .map((tick) => Number(tick.quote))
-    .filter((value) => Number.isFinite(value))
-  const scale = chartScale(values)
-  const candles = createCandles(ticks, candleGroupSize[timeframe])
-
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-950 p-2 sm:p-4">
-      <svg
-        viewBox="0 0 1200 540"
-        className="h-96 w-full"
-        role="img"
-        aria-label={
-          chartMode === 'candles'
-            ? 'Observed market candlestick chart'
-            : 'Observed market tick line chart'
-        }
-      >
-        <ChartGrid scale={scale} />
-        {chartMode === 'ticks' ? (
-          <TickLine ticks={ticks} scale={scale} />
-        ) : (
-          <CandleBars candles={candles} scale={scale} />
-        )}
-        {values.length === 0 ? (
-          <text
-            x="600"
-            y="270"
-            textAnchor="middle"
-            className="fill-slate-500 text-2xl"
-          >
-            Waiting for observed price data
-          </text>
-        ) : null}
-      </svg>
-    </div>
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-md px-3 text-xs font-bold transition ${
+        active
+          ? 'bg-sky-400 text-slate-950 shadow-sm'
+          : 'text-slate-400 hover:text-white'
+      }`}
+    >
+      {label}
+    </button>
   )
 }
 
-function ChartGrid({ scale }: Readonly<{ scale: PriceScale }>) {
+function Metric({
+  label,
+  live = false,
+  value
+}: Readonly<{ label: string; live?: boolean; value: string }>) {
   return (
-    <>
-      {[80, 180, 280, 380, 480].map((y, index) => {
-        const value = scale.max - ((y - 80) / 400) * (scale.max - scale.min)
-
-        return (
-          <g key={y}>
-            <line
-              x1="78"
-              x2="1150"
-              y1={y}
-              y2={y}
-              className="stroke-slate-800"
-              strokeWidth="1"
-            />
-            <text x="12" y={y + 5} className="fill-slate-500 text-sm">
-              {index === 0 || index === 4 ? formatPrice(value) : ''}
-            </text>
-          </g>
-        )
-      })}
-      <line
-        x1="78"
-        x2="78"
-        y1="60"
-        y2="480"
-        className="stroke-slate-700"
-        strokeWidth="1"
-      />
-      <line
-        x1="78"
-        x2="1150"
-        y1="480"
-        y2="480"
-        className="stroke-slate-700"
-        strokeWidth="1"
-      />
-    </>
-  )
-}
-
-function TickLine({
-  ticks,
-  scale
-}: Readonly<{
-  ticks: readonly MarketTick[]
-  scale: PriceScale
-}>) {
-  const points = ticks
-    .map((tick, index) => {
-      const quote = Number(tick.quote)
-      if (!Number.isFinite(quote)) return null
-      return `${xPosition(index, ticks.length)},${scale.toY(quote)}`
-    })
-    .filter((point): point is string => point !== null)
-    .join(' ')
-
-  return points.length === 0 ? null : (
-    <>
-      <polyline
-        points={points}
-        className="fill-none stroke-sky-400"
-        strokeWidth="4"
-        strokeLinejoin="round"
-        strokeLinecap="round"
-      />
-      {ticks.slice(-1).map((tick) => {
-        const quote = Number(tick.quote)
-        if (!Number.isFinite(quote)) return null
-
-        return (
-          <circle
-            key={`${tick.epoch}-${tick.receivedAt}`}
-            cx={xPosition(ticks.length - 1, ticks.length)}
-            cy={scale.toY(quote)}
-            r="7"
-            className="fill-sky-300 stroke-slate-950"
-            strokeWidth="4"
-          />
-        )
-      })}
-    </>
-  )
-}
-
-function CandleBars({
-  candles,
-  scale
-}: Readonly<{
-  candles: readonly Candle[]
-  scale: PriceScale
-}>) {
-  const spacing = 1072 / Math.max(candles.length, 1)
-  const width = Math.max(8, Math.min(34, spacing * 0.58))
-
-  return candles.map((candle, index) => {
-    const x = 78 + spacing * index + spacing / 2
-    const openY = scale.toY(candle.open)
-    const closeY = scale.toY(candle.close)
-    const isRising = candle.close >= candle.open
-    const bodyTop = Math.min(openY, closeY)
-
-    return (
-      <g key={`${index}-${candle.open}-${candle.close}`}>
-        <line
-          x1={x}
-          x2={x}
-          y1={scale.toY(candle.high)}
-          y2={scale.toY(candle.low)}
-          className={isRising ? 'stroke-emerald-400' : 'stroke-rose-400'}
-          strokeWidth="3"
-        />
-        <rect
-          x={x - width / 2}
-          y={bodyTop}
-          width={width}
-          height={Math.max(5, Math.abs(closeY - openY))}
-          className={isRising ? 'fill-emerald-400' : 'fill-rose-400'}
-          rx="2"
-        />
-      </g>
-    )
-  })
-}
-
-function Metric({ label, value }: Readonly<{ label: string; value: string }>) {
-  return (
-    <div>
-      <p className="text-xs font-bold tracking-wider text-slate-500 uppercase">
+    <div className="flex items-center justify-between gap-3">
+      <p className="text-[10px] font-bold tracking-wider text-slate-500 uppercase">
         {label}
       </p>
-      <p className="mt-1.5 font-semibold text-slate-100 capitalize">{value}</p>
+      <p className="flex items-center gap-1.5 text-xs font-bold text-slate-100 capitalize">
+        {live ? (
+          <span className="size-1.5 rounded-full bg-emerald-400" />
+        ) : null}
+        {value}
+      </p>
     </div>
   )
 }
 
 function StateCard({
-  icon,
-  title,
-  message,
   action,
-  danger = false
+  danger = false,
+  icon,
+  message,
+  title
 }: Readonly<{
-  icon: ReactNode
-  title: string
-  message: string
   action?: ReactNode
   danger?: boolean
+  icon: ReactNode
+  message: string
+  title: string
 }>) {
   return (
     <section
-      className={`mt-5 rounded-3xl border p-8 text-center ${
+      className={`mt-4 rounded-2xl border p-8 text-center ${
         danger
           ? 'border-rose-900 bg-rose-950/40'
           : 'border-slate-800 bg-slate-900'
@@ -538,61 +416,15 @@ function StateCard({
   )
 }
 
-type PriceScale = Readonly<{
-  min: number
-  max: number
-  toY: (value: number) => number
-}>
-
-function chartScale(values: readonly number[]): PriceScale {
-  const low = values.length === 0 ? 0 : Math.min(...values)
-  const high = values.length === 0 ? 1 : Math.max(...values)
-  const padding = Math.max((high - low) * 0.12, Math.abs(high) * 0.0002, 0.01)
-  const min = low - padding
-  const max = high + padding
-  const range = max - min
-
-  return {
-    min,
-    max,
-    toY: (value) => 480 - ((value - min) / range) * 400
-  }
-}
-
-function createCandles(
-  ticks: readonly MarketTick[],
-  groupSize: number
-): readonly Candle[] {
-  const candles: Candle[] = []
-
-  for (let index = 0; index < ticks.length; index += groupSize) {
-    const values = ticks
-      .slice(index, index + groupSize)
-      .map((tick) => Number(tick.quote))
-      .filter((value) => Number.isFinite(value))
-
-    if (values.length === 0) continue
-
-    candles.push({
-      open: values[0],
-      high: Math.max(...values),
-      low: Math.min(...values),
-      close: values[values.length - 1]
-    })
-  }
-
-  return candles
-}
-
-function xPosition(index: number, count: number): number {
-  if (count < 2) return 614
-  return 78 + (index / (count - 1)) * 1072
-}
-
-function formatPrice(value: number): string {
-  return new Intl.NumberFormat(undefined, {
-    maximumFractionDigits: 4
-  }).format(value)
+function barCount(
+  history: MarketCandleHistory,
+  tickCount: number,
+  timeframe: ChartTimeframe
+): number {
+  if (timeframe === '1 minute') return history.oneMinute.length
+  if (timeframe === '5 minutes') return history.fiveMinutes.length
+  if (timeframe === '1 hour') return history.oneHour.length
+  return tickCount
 }
 
 function readChartPreferences(): ChartPreferences {
@@ -606,7 +438,7 @@ function readChartPreferences(): ChartPreferences {
     if (
       typeof stored.market !== 'string' ||
       (stored.chartMode !== 'ticks' && stored.chartMode !== 'candles') ||
-      !timeframes.includes(stored.timeframe as Timeframe)
+      !chartTimeframes.includes(stored.timeframe as ChartTimeframe)
     ) {
       return defaultChartPreferences
     }
@@ -614,7 +446,7 @@ function readChartPreferences(): ChartPreferences {
     return {
       market: stored.market,
       chartMode: stored.chartMode,
-      timeframe: stored.timeframe as Timeframe
+      timeframe: stored.timeframe as ChartTimeframe
     }
   } catch {
     return defaultChartPreferences

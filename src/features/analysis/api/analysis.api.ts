@@ -25,6 +25,14 @@ const tickSchema = z.object({
   receivedAt: z.string().datetime()
 })
 
+const candleSchema = z.object({
+  epoch: z.number().int().nonnegative(),
+  open: z.string(),
+  high: z.string(),
+  low: z.string(),
+  close: z.string()
+})
+
 const analysisSchema = z.object({
   market: z.string(),
   health: z.object({
@@ -36,6 +44,11 @@ const analysisSchema = z.object({
   }),
   latestTick: tickSchema.nullable(),
   recentTicks: z.array(tickSchema),
+  candles: z.object({
+    oneMinute: z.array(candleSchema),
+    fiveMinutes: z.array(candleSchema),
+    oneHour: z.array(candleSchema)
+  }),
   movement: z.object({
     rising: z.number().int().nonnegative(),
     falling: z.number().int().nonnegative(),
