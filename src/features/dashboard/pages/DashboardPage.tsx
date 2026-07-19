@@ -240,7 +240,9 @@ function ConnectedAccount({
   account,
   onRefresh
 }: Readonly<{ account: AuthorizedAccount; onRefresh: () => void }>) {
-  const connected = account.connectionState.endsWith('connected')
+  const connected =
+    account.connectionState === 'demo_connected' ||
+    account.connectionState === 'real_connected'
   return (
     <div className="mt-8">
       <div className="flex items-start justify-between gap-3">
