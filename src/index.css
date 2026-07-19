@@ -1,3 +1,51 @@
 @import 'tailwindcss';
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  html {
+    @apply bg-slate-950;
+  }
+
+  body {
+    @apply min-w-80 bg-slate-100 text-slate-950 antialiased dark:bg-slate-950 dark:text-slate-100;
+  }
+
+  button,
+  a,
+  select,
+  input {
+    @apply transition-colors duration-150;
+  }
+
+  ::selection {
+    @apply bg-sky-400 text-slate-950;
+  }
+}
+
+@layer utilities {
+  .dark .dark\:bg-white {
+    @apply bg-slate-900;
+  }
+
+  .dark .dark\:text-slate-950 {
+    @apply text-slate-100;
+  }
+
+  .dark .dark\:border-slate-300 {
+    @apply border-slate-700;
+  }
+
+  .dark .dark\:bg-emerald-950,
+  .dark .dark\:bg-amber-950 {
+    @apply bg-slate-900;
+  }
+
+  .text-emerald-700 {
+    @apply text-sky-700;
+  }
+
+  .dark .dark\:text-emerald-300 {
+    @apply text-sky-300;
+  }
+}

@@ -5,6 +5,7 @@ import {
   CircleAlert,
   Gauge,
   LoaderCircle,
+  RefreshCw,
   ShieldAlert,
   WalletCards,
   Zap
@@ -14,8 +15,9 @@ import { useAccounts } from '../../accounts/hooks/useAccounts'
 import type { AuthorizedAccount } from '../../accounts/types/accounts.types'
 
 function balance(account: AuthorizedAccount): string {
-  if (account.balance === null) return 'Waiting for Deriv'
-  return `${account.balance} ${account.currency}`
+  return account.balance === null
+    ? 'Waiting for Deriv'
+    : `${account.balance} ${account.currency}`
 }
 
 export function DashboardPage() {
@@ -28,40 +30,61 @@ export function DashboardPage() {
       : null
 
   return (
-    <main className="mx-auto max-w-screen-2xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-      <section className="grid gap-6 lg:grid-cols-5">
-        <div className="rounded-3xl bg-slate-950 p-6 text-white sm:p-8 lg:col-span-3 dark:bg-white dark:text-slate-950">
-          <p className="flex items-center gap-2 text-sm font-bold text-emerald-300 dark:text-emerald-700">
-            <Gauge className="size-4" aria-hidden="true" /> Automation overview
-          </p>
-          <h1 className="mt-4 max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl">
-            Watch the account, market, and risk boundary from one place.
-          </h1>
-          <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-300 dark:text-slate-600">
-            Start only after reviewing a valid trade preview. Live market
-            information is observational; it is never a prediction of a future
-            trade.
-          </p>
-          <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-            <Link
-              to="/bots"
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-bold text-slate-950 dark:bg-slate-950 dark:text-white"
-            >
-              <Bot className="size-4" aria-hidden="true" /> Open Bot Builder{' '}
-              <ArrowRight className="size-4" aria-hidden="true" />
-            </Link>
-            <Link
-              to="/analysis"
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-700 px-4 py-2.5 text-sm font-bold text-white dark:border-slate-300 dark:text-slate-950"
-            >
-              <Activity className="size-4" aria-hidden="true" /> Analyze market
-            </Link>
+    <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+      <section className="grid gap-5 xl:grid-cols-5">
+        <div className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-2xl shadow-slate-950/20 sm:p-8 xl:col-span-3">
+          <div
+            className="absolute -top-20 -right-20 size-56 rounded-full bg-sky-400/10 blur-3xl"
+            aria-hidden="true"
+          />
+          <div className="relative">
+            <p className="flex items-center gap-2 text-xs font-bold tracking-wider text-sky-600 uppercase dark:text-sky-300">
+              <span className="flex size-6 items-center justify-center rounded-full bg-sky-400/15">
+                <Gauge className="size-3.5" aria-hidden="true" />
+              </span>
+              Command center
+            </p>
+            <h1 className="mt-5 max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl">
+              A calmer view of your account, market, and risk limits.
+            </h1>
+            <p className="mt-4 max-w-xl text-sm leading-6 text-slate-600 dark:text-slate-300">
+              Validate a trade preview before starting. Market observations help
+              you review data; they never predict a future trade.
+            </p>
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+              <Link
+                to="/bots"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-sky-400 px-4 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-sky-300"
+              >
+                <Bot className="size-4" aria-hidden="true" /> Build a bot{' '}
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </Link>
+              <Link
+                to="/analysis"
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-700 bg-slate-950 px-4 py-2.5 text-sm font-bold text-slate-200 transition hover:border-sky-400 hover:text-sky-300"
+              >
+                <Activity className="size-4" aria-hidden="true" /> Explore
+                analysis
+              </Link>
+            </div>
           </div>
         </div>
-        <aside className="rounded-3xl border border-slate-200 bg-white p-6 lg:col-span-2 dark:border-slate-800 dark:bg-slate-900">
-          <p className="text-sm font-bold text-slate-500 dark:text-slate-400">
-            Selected account
-          </p>
+
+        <aside className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm xl:col-span-2 dark:border-slate-800 dark:bg-slate-900">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold tracking-wider text-slate-500 uppercase dark:text-slate-400">
+                Selected account
+              </p>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                Account data is reported by Deriv.
+              </p>
+            </div>
+            <WalletCards
+              className="size-5 text-sky-600 dark:text-sky-300"
+              aria-hidden="true"
+            />
+          </div>
           {state.status === 'loading' ? <LoadingAccount /> : null}
           {state.status === 'empty' ? <EmptyAccount /> : null}
           {state.status === 'error' ? (
@@ -76,65 +99,59 @@ export function DashboardPage() {
         </aside>
       </section>
 
-      <section className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <section className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatusCard
-          label="Auto Trader"
+          label="Automation"
           value="Idle"
           detail="No active session"
           icon={Bot}
-          tone="slate"
         />
         <StatusCard
-          label="Market workspace"
+          label="Market data"
           value="Ready"
-          detail="Connect a feed in Analysis"
+          detail="Choose a feed in Analysis"
           icon={Activity}
-          tone="emerald"
         />
         <StatusCard
-          label="Active contracts"
-          value="0"
-          detail="No contract action implied"
+          label="Contracts"
+          value="0 open"
+          detail="No trade action implied"
           icon={Zap}
-          tone="slate"
         />
         <StatusCard
-          label="Risk protection"
+          label="Risk guard"
           value="Available"
-          detail="Emergency Stop is one tap away"
+          detail="Emergency Stop is ready"
           icon={ShieldAlert}
-          tone="amber"
         />
       </section>
 
-      <section className="mt-6 grid gap-6 xl:grid-cols-5">
-        <article className="rounded-3xl border border-slate-200 bg-white p-6 xl:col-span-3 dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+      <section className="mt-5 grid gap-5 xl:grid-cols-5">
+        <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm xl:col-span-3 dark:border-slate-800 dark:bg-slate-900">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300">
+              <p className="text-xs font-bold tracking-wider text-sky-600 uppercase dark:text-sky-300">
                 Live tick workspace
               </p>
-              <h2 className="mt-1 text-2xl font-semibold tracking-tight">
+              <h2 className="mt-2 text-2xl font-semibold tracking-tight">
                 Connect a market to populate the digit board.
               </h2>
             </div>
             <Link
               to="/analysis"
-              className="inline-flex items-center gap-2 text-sm font-bold underline"
+              className="inline-flex items-center gap-2 text-sm font-bold text-sky-700 transition hover:text-sky-500 dark:text-sky-300 dark:hover:text-sky-200"
             >
-              Open Analysis Tool{' '}
-              <ArrowRight className="size-4" aria-hidden="true" />
+              Open analysis <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
           </div>
           <div className="mt-6 grid gap-4 lg:grid-cols-5">
-            <div className="rounded-2xl bg-slate-100 p-5 lg:col-span-2 dark:bg-slate-800">
-              <p className="text-xs font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 lg:col-span-2 dark:border-slate-800 dark:bg-slate-950">
+              <p className="text-xs font-bold tracking-wider text-slate-500 uppercase dark:text-slate-400">
                 Latest tick
               </p>
-              <p className="mt-3 text-3xl font-semibold">—</p>
-              <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-                Choose an authorized account and a market feed to view live
-                data.
+              <p className="mt-4 text-4xl font-semibold tracking-tight">—</p>
+              <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                Select an authorized account and market feed to view live data.
               </p>
             </div>
             <div
@@ -144,7 +161,7 @@ export function DashboardPage() {
               {Array.from({ length: 10 }, (_, digit) => (
                 <div
                   key={digit}
-                  className="flex aspect-square items-center justify-center rounded-xl border border-slate-200 text-sm font-bold text-slate-500 dark:border-slate-700 dark:text-slate-400"
+                  className="flex aspect-square items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-sm font-bold text-slate-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400"
                 >
                   {digit}
                 </div>
@@ -152,28 +169,27 @@ export function DashboardPage() {
             </div>
           </div>
           <p className="mt-5 text-xs leading-5 text-slate-500 dark:text-slate-400">
-            Frequency is a historical observation, not a probability of the next
+            Frequency is historical observation, not a probability of the next
             independent tick.
           </p>
         </article>
-        <article className="rounded-3xl border border-amber-200 bg-amber-50 p-6 xl:col-span-2 dark:border-amber-900 dark:bg-amber-950">
-          <p className="flex items-center gap-2 text-sm font-bold text-amber-800 dark:text-amber-200">
-            <CircleAlert className="size-4" aria-hidden="true" /> Risk
-            disclaimer
+
+        <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm xl:col-span-2 dark:border-slate-800 dark:bg-slate-900">
+          <p className="flex items-center gap-2 text-xs font-bold tracking-wider text-amber-700 uppercase dark:text-amber-300">
+            <CircleAlert className="size-4" aria-hidden="true" /> Risk reminder
           </p>
-          <h2 className="mt-3 text-xl font-semibold tracking-tight">
-            Keep loss limits more visible than optimistic assumptions.
+          <h2 className="mt-4 text-xl font-semibold tracking-tight">
+            Keep loss limits visible before any trade.
           </h2>
-          <p className="mt-3 text-sm leading-6 text-amber-950 dark:text-amber-100">
-            Automation can lose money. Past results and historical market
-            observations do not predict future outcomes. Martingale and bulk
-            entries can increase losses; no profit is guaranteed.
+          <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
+            Automation can lose money. Historical observations do not predict
+            outcomes, and martingale or bulk entries can increase losses.
           </p>
           <Link
             to="/risk"
-            className="mt-6 inline-flex items-center gap-2 rounded-lg border border-amber-300 px-4 py-2.5 text-sm font-bold text-amber-950 dark:border-amber-800 dark:text-amber-100"
+            className="mt-6 inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-bold text-slate-800 transition hover:border-sky-400 hover:text-sky-700 dark:border-slate-700 dark:text-slate-200 dark:hover:border-sky-400 dark:hover:text-sky-300"
           >
-            Open Risk Calculator{' '}
+            Open risk controls{' '}
             <ArrowRight className="size-4" aria-hidden="true" />
           </Link>
         </article>
@@ -184,93 +200,107 @@ export function DashboardPage() {
 
 function LoadingAccount() {
   return (
-    <div className="mt-6 flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300">
-      <LoaderCircle className="size-5 animate-spin" aria-hidden="true" />{' '}
+    <div className="mt-8 flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300">
+      <LoaderCircle
+        className="size-5 animate-spin text-sky-600 dark:text-sky-300"
+        aria-hidden="true"
+      />{' '}
       Checking account connection…
     </div>
   )
 }
+
 function EmptyAccount() {
   return (
-    <div className="mt-6">
+    <div className="mt-8">
       <p className="text-lg font-semibold">No account connected</p>
       <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-        Connect a Deriv account to see your balance, connection state, and
+        Connect a Deriv account to see balance, connection state, and
         account-bound controls.
       </p>
       <Link
         to="/accounts"
-        className="mt-5 inline-flex items-center gap-2 rounded-lg bg-slate-950 px-4 py-2.5 text-sm font-bold text-white dark:bg-white dark:text-slate-950"
+        className="mt-5 inline-flex items-center gap-2 rounded-lg bg-sky-400 px-4 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-sky-300"
       >
         <WalletCards className="size-4" aria-hidden="true" /> Open accounts
       </Link>
     </div>
   )
 }
+
 function ErrorAccount({ message }: Readonly<{ message: string }>) {
   return (
-    <div className="mt-6 rounded-2xl bg-rose-50 p-4 text-sm leading-6 text-rose-800 dark:bg-rose-950 dark:text-rose-200">
+    <div className="mt-6 rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 text-sm leading-6 text-rose-700 dark:text-rose-200">
       {message}
     </div>
   )
 }
+
 function ConnectedAccount({
   account,
   onRefresh
 }: Readonly<{ account: AuthorizedAccount; onRefresh: () => void }>) {
+  const connected = account.connectionState.endsWith('connected')
   return (
-    <div className="mt-6">
+    <div className="mt-8">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-lg font-semibold">{account.displayName}</p>
+          <p className="text-xl font-semibold tracking-tight">
+            {account.displayName}
+          </p>
           <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
             {balance(account)}
           </p>
         </div>
         <span
-          className={`rounded-full px-2.5 py-1 text-xs font-bold ${account.kind === 'real' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200' : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200'}`}
+          className={`rounded-full px-2.5 py-1 text-xs font-bold ${account.kind === 'real' ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300' : 'bg-sky-500/15 text-sky-700 dark:text-sky-300'}`}
         >
           {account.kind === 'real' ? 'Real' : 'Demo'}
         </span>
       </div>
-      <p className="mt-5 text-sm font-medium text-slate-600 dark:text-slate-300">
-        {account.connectionState.replaceAll('_', ' ')}
-      </p>
+      <div className="mt-6 flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 dark:border-slate-800 dark:bg-slate-950">
+        <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+          {account.connectionState.replaceAll('_', ' ')}
+        </span>
+        <span
+          className={`size-2 rounded-full ${connected ? 'bg-sky-400' : 'bg-slate-400'}`}
+          aria-label={connected ? 'Connected' : 'Disconnected'}
+        />
+      </div>
       <button
         type="button"
         onClick={onRefresh}
-        className="mt-5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold dark:border-slate-700"
+        className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-sky-700 transition hover:text-sky-500 dark:text-sky-300"
       >
-        Refresh account
+        <RefreshCw className="size-4" aria-hidden="true" /> Refresh account
       </button>
     </div>
   )
 }
+
 function StatusCard({
   label,
   value,
   detail,
-  icon: Icon,
-  tone
+  icon: Icon
 }: Readonly<{
   label: string
   value: string
   detail: string
   icon: typeof Bot
-  tone: 'slate' | 'emerald' | 'amber'
 }>) {
-  const tones = {
-    slate: 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100',
-    emerald:
-      'bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-100',
-    amber: 'bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-100'
-  }
   return (
-    <article className={`rounded-2xl p-5 ${tones[tone]}`}>
-      <Icon className="size-5" aria-hidden="true" />
-      <p className="mt-5 text-xs font-bold tracking-wide uppercase">{label}</p>
-      <p className="mt-1 text-xl font-semibold">{value}</p>
-      <p className="mt-1 text-sm opacity-75">{detail}</p>
+    <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-sky-400/60 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+      <span className="flex size-9 items-center justify-center rounded-xl bg-sky-500/10 text-sky-700 dark:text-sky-300">
+        <Icon className="size-4" aria-hidden="true" />
+      </span>
+      <p className="mt-5 text-xs font-bold tracking-wider text-slate-500 uppercase dark:text-slate-400">
+        {label}
+      </p>
+      <p className="mt-1 text-xl font-semibold tracking-tight">{value}</p>
+      <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+        {detail}
+      </p>
     </article>
   )
 }
