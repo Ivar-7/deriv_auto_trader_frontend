@@ -11,7 +11,7 @@ export default async function handler(request, response) {
   const method = request.method ?? 'GET'
   const body = requestBody(request, method)
   const headers = requestHeaders(request.headers)
-  const target = new URL(request.url ?? '/api', backendOrigin)
+  const target = backendTarget(request)
   const upstream = await forwardRequest(target, {
     method,
     headers,
@@ -32,6 +32,33 @@ export default async function handler(request, response) {
   copyResponseHeaders(upstream, response)
   response.status(upstream.status)
   response.send(Buffer.from(await upstream.arrayBuffer()))
+}
+
+function backendTarget(request) {
+  const requestUrl = new URL(request.url ?? '/api', backendOrigin)
+  const path = catchAllPath(request.query?.path)
+  const target = new URL(
+    path === null ? requestUrl.pathname : `/api/${path}`,
+    backendOrigin
+  )
+
+  for (const [key, value] of Object.entries(request.query ?? {})) {
+    if (key === 'path' || value === undefined) continue
+
+    for (const item of Array.isArray(value) ? value : [value]) {
+      target.searchParams.append(key, item)
+    }
+  }
+
+  return target
+}
+
+function catchAllPath(value) {
+  if (typeof value === 'string') return value
+  if (Array.isArray(value) && value.every((item) => typeof item === 'string')) {
+    return value.join('/')
+  }
+  return null
 }
 
 async function forwardRequest(target, init) {
