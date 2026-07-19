@@ -1,10 +1,12 @@
 import { createBrowserRouter } from 'react-router-dom'
 import { AuthenticatedLayout } from './layouts/AuthenticatedLayout'
 import { RouteErrorPage } from '../shared/components/RouteErrorPage'
+import { RouteHydrateFallback } from '../shared/components/RouteHydrateFallback'
 
 export const router = createBrowserRouter([
   {
     path: '/',
+    HydrateFallback: RouteHydrateFallback,
     lazy: async () => {
       const { LandingPage } =
         await import('../features/landing/pages/LandingPage')
@@ -14,6 +16,7 @@ export const router = createBrowserRouter([
   },
   {
     element: <AuthenticatedLayout />,
+    HydrateFallback: RouteHydrateFallback,
     errorElement: <RouteErrorPage />,
     children: [
       {
