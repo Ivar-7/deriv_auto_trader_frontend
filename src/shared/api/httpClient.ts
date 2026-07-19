@@ -35,7 +35,7 @@ export async function apiRequest<TData>(
   let response: Response
 
   try {
-    response = await fetch(
+    response = await requestWithRecovery(
       new URL(path, environment.value.VITE_API_URL).toString(),
       {
         ...options,
@@ -95,7 +95,7 @@ export async function apiTextRequest(
   let response: Response
 
   try {
-    response = await fetch(
+    response = await requestWithRecovery(
       new URL(path, environment.value.VITE_API_URL).toString(),
       {
         ...options,
@@ -127,6 +127,37 @@ async function readJson(response: Response): Promise<unknown> {
   } catch {
     return null
   }
+}
+
+async function requestWithRecovery(
+  url: string,
+  options: Readonly<RequestInit>
+): Promise<Response> {
+  const isReadRequest = (options.method ?? 'GET').toUpperCase() === 'GET'
+  const attempts = isReadRequest ? 2 : 1
+
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      const response = await fetch(url, options)
+
+      if (
+        attempt === attempts - 1 ||
+        ![502, 503, 504, 522].includes(response.status)
+      ) {
+        return response
+      }
+    } catch (error) {
+      if (attempt === attempts - 1) {
+        throw error
+      }
+    }
+
+    await new Promise<void>((resolve) => {
+      window.setTimeout(resolve, 700)
+    })
+  }
+
+  throw new Error('Unreachable request recovery state.')
 }
 
 function asApiFailure(payload: unknown): ApiFailure | null {
