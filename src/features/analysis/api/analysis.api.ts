@@ -2,8 +2,10 @@ import { z } from 'zod'
 import { apiRequest } from '../../../shared/api/httpClient'
 import type {
   AnalysisParameters,
+  ActiveMarketSymbol,
   MarketAnalysis,
-  MarketScannerObservation
+  MarketScannerObservation,
+  ReplayTickInput
 } from '../types/analysis.types'
 
 const dataStateSchema = z.enum([
@@ -17,10 +19,12 @@ const dataStateSchema = z.enum([
 
 const tickSchema = z.object({
   market: z.string(),
+  symbol: z.string(),
   epoch: z.number().int(),
   quote: z.string(),
   digit: z.number().int().min(0).max(9),
-  direction: z.enum(['rising', 'falling', 'neutral']),
+  priceChange: z.string().nullable(),
+  direction: z.enum(['UP', 'DOWN', 'FLAT']),
   latencyMs: z.number().nullable(),
   receivedAt: z.string().datetime()
 })
@@ -31,6 +35,13 @@ const candleSchema = z.object({
   high: z.string(),
   low: z.string(),
   close: z.string()
+})
+
+const streakSummarySchema = z.object({
+  current: z.string().nullable(),
+  currentLength: z.number().int().nonnegative(),
+  averageLength: z.number().nonnegative().nullable(),
+  longestRecent: z.number().int().nonnegative()
 })
 
 const analysisSchema = z.object({
@@ -88,7 +99,7 @@ const analysisSchema = z.object({
   streaks: z.object({
     direction: z
       .object({
-        direction: z.enum(['rising', 'falling', 'neutral']),
+        direction: z.enum(['UP', 'DOWN', 'FLAT']),
         length: z.number().int().positive()
       })
       .nullable(),
@@ -100,11 +111,63 @@ const analysisSchema = z.object({
       .nullable()
   }),
   parameters: z.object({
-    movementWindow: z.number().int().min(20).max(50),
-    digitWindow: z.number().int().min(100).max(500),
+    movementWindow: z.number().int().min(10).max(100),
+    digitWindow: z.number().int().min(10).max(1000),
     barrier: z.number().int().min(0).max(9),
     confidenceThreshold: z.number().min(0.5).max(1)
   }),
+  digitFrequency: z.array(
+    z.object({
+      window: z.number().int(),
+      sampleSize: z.number().int().nonnegative(),
+      digits: z.array(
+        z.object({
+          digit: z.number().int().min(0).max(9),
+          count: z.number().int().nonnegative(),
+          percentage: z.number().min(0).max(1),
+          deviationFromExpected: z.number()
+        })
+      ),
+      hottestDigit: z.number().int().min(0).max(9).nullable(),
+      coldestDigit: z.number().int().min(0).max(9).nullable()
+    })
+  ),
+  digitStreaks: z.object({
+    repeatedDigits: streakSummarySchema,
+    evenOdd: streakSummarySchema,
+    overUnder: streakSummarySchema
+  }),
+  tickPressure: z.array(
+    z.object({
+      window: z.number().int(),
+      sampleSize: z.number().int().nonnegative(),
+      upTicks: z.number().int().nonnegative(),
+      downTicks: z.number().int().nonnegative(),
+      flatTicks: z.number().int().nonnegative(),
+      pressure: z.number().min(-1).max(1).nullable(),
+      classification: z.enum([
+        'Strong Up',
+        'Up',
+        'Neutral',
+        'Down',
+        'Strong Down'
+      ]),
+      consecutiveUp: z.number().int().nonnegative(),
+      consecutiveDown: z.number().int().nonnegative(),
+      volatility: z.number().nonnegative().nullable()
+    })
+  ),
+  anomalies: z.array(
+    z.object({
+      digit: z.number().int().min(0).max(9),
+      count: z.number().int().nonnegative(),
+      sampleSize: z.number().int().nonnegative(),
+      observedPercentage: z.number().min(0).max(1).nullable(),
+      expectedPercentage: z.literal(0.1),
+      zScore: z.number().nullable(),
+      label: z.enum(['Normal', 'Mild', 'Significant', 'Extreme'])
+    })
+  ),
   updatedAt: z.string().datetime()
 })
 
@@ -116,7 +179,23 @@ const scannerSchema = z.object({
   longestAbsence: z.number().int().nonnegative(),
   observedDiffersPercentage: z.number().nullable(),
   theoreticalBaseline: z.number().min(0).max(1),
-  normalizedDeviation: z.number().nullable()
+  normalizedDeviation: z.number().nullable(),
+  activityScore: z.number().min(0).max(100),
+  activityComponents: z.object({
+    directionalPressure: z.number().min(0).max(100),
+    volatility: z.number().min(0).max(100),
+    digitFrequencyDeviation: z.number().min(0).max(100),
+    streakAnomaly: z.number().min(0).max(100),
+    tickActivity: z.number().min(0).max(100)
+  })
+})
+
+const activeSymbolSchema = z.object({
+  symbol: z.string(),
+  displayName: z.string(),
+  market: z.string(),
+  submarket: z.string(),
+  pipSize: z.number().int().min(0).max(12).nullable()
 })
 
 function parse<T>(schema: z.ZodType<T>) {
@@ -130,6 +209,36 @@ export function subscribeToMarket(market: string): Promise<MarketAnalysis> {
   return apiRequest('/api/v1/markets/subscribe', parse(analysisSchema), {
     method: 'POST',
     body: JSON.stringify({ market })
+  })
+}
+
+export function unsubscribeFromMarket(
+  market: string
+): Promise<{ market: string }> {
+  return apiRequest(
+    '/api/v1/markets/unsubscribe',
+    parse(z.object({ market: z.string() })),
+    {
+      method: 'POST',
+      body: JSON.stringify({ market })
+    }
+  )
+}
+
+export function getActiveSymbols(): Promise<readonly ActiveMarketSymbol[]> {
+  return apiRequest(
+    '/api/v1/markets/symbols',
+    parse(z.array(activeSymbolSchema))
+  )
+}
+
+export function replayMarket(
+  market: string,
+  ticks: readonly ReplayTickInput[]
+): Promise<MarketAnalysis> {
+  return apiRequest('/api/v1/markets/replay', parse(analysisSchema), {
+    method: 'POST',
+    body: JSON.stringify({ market, ticks })
   })
 }
 

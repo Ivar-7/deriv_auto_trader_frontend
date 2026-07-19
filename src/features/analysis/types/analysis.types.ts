@@ -1,6 +1,6 @@
 import type { AccountSession } from '../../accounts/types/accounts.types'
 
-export type TickDirection = 'rising' | 'falling' | 'neutral'
+export type TickDirection = 'UP' | 'DOWN' | 'FLAT'
 export type MarketDataState =
   'idle' | 'connecting' | 'live' | 'stale' | 'disconnected' | 'error'
 
@@ -13,9 +13,11 @@ export type AnalysisParameters = Readonly<{
 
 export type MarketTick = Readonly<{
   market: string
+  symbol: string
   epoch: number
   quote: string
   digit: number
+  priceChange: string | null
   direction: TickDirection
   latencyMs: number | null
   receivedAt: string
@@ -89,6 +91,44 @@ export type MarketAnalysis = Readonly<{
     direction: Readonly<{ direction: TickDirection; length: number }> | null
     digit: Readonly<{ digit: number; length: number }> | null
   }>
+  digitFrequency: readonly Readonly<{
+    window: number
+    sampleSize: number
+    digits: readonly Readonly<{
+      digit: number
+      count: number
+      percentage: number
+      deviationFromExpected: number
+    }>[]
+    hottestDigit: number | null
+    coldestDigit: number | null
+  }>[]
+  digitStreaks: Readonly<{
+    repeatedDigits: StreakSummary
+    evenOdd: StreakSummary
+    overUnder: StreakSummary
+  }>
+  tickPressure: readonly Readonly<{
+    window: number
+    sampleSize: number
+    upTicks: number
+    downTicks: number
+    flatTicks: number
+    pressure: number | null
+    classification: 'Strong Up' | 'Up' | 'Neutral' | 'Down' | 'Strong Down'
+    consecutiveUp: number
+    consecutiveDown: number
+    volatility: number | null
+  }>[]
+  anomalies: readonly Readonly<{
+    digit: number
+    count: number
+    sampleSize: number
+    observedPercentage: number | null
+    expectedPercentage: number
+    zScore: number | null
+    label: 'Normal' | 'Mild' | 'Significant' | 'Extreme'
+  }>[]
   parameters: AnalysisParameters
   updatedAt: string
 }>
@@ -102,6 +142,35 @@ export type MarketScannerObservation = Readonly<{
   observedDiffersPercentage: number | null
   theoreticalBaseline: number
   normalizedDeviation: number | null
+  activityScore: number
+  activityComponents: Readonly<{
+    directionalPressure: number
+    volatility: number
+    digitFrequencyDeviation: number
+    streakAnomaly: number
+    tickActivity: number
+  }>
+}>
+
+export type ActiveMarketSymbol = Readonly<{
+  symbol: string
+  displayName: string
+  market: string
+  submarket: string
+  pipSize: number | null
+}>
+
+export type ReplayTickInput = Readonly<{
+  epoch: number
+  quote: string
+  pipSize: number | null
+}>
+
+type StreakSummary = Readonly<{
+  current: string | null
+  currentLength: number
+  averageLength: number | null
+  longestRecent: number
 }>
 
 export type MarketConsoleData = Readonly<{

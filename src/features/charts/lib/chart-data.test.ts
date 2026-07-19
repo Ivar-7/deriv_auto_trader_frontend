@@ -7,10 +7,12 @@ import { candlesForTimeframe, decimalPlaces } from './chart-data'
 
 const tick: MarketTick = {
   market: 'R_100',
+  symbol: 'R_100',
   epoch: 1_700_000_000,
   quote: '123.450',
   digit: 0,
-  direction: 'neutral',
+  priceChange: null,
+  direction: 'FLAT',
   latencyMs: 10,
   receivedAt: '2026-01-01T00:00:00.000Z'
 }

@@ -4,14 +4,19 @@ import type { AccountSession } from '../../accounts/types/accounts.types'
 import { ApiError } from '../../../shared/api/httpClient'
 import {
   getMarketAnalysis,
+  getActiveSymbols,
   getScanner,
+  replayMarket,
   subscribeToMarket,
-  subscribeToScanner
+  subscribeToScanner,
+  unsubscribeFromMarket
 } from '../api/analysis.api'
 import type {
+  ActiveMarketSymbol,
   AnalysisParameters,
   MarketConsoleData,
-  MarketScannerObservation
+  MarketScannerObservation,
+  ReplayTickInput
 } from '../types/analysis.types'
 
 export type MarketConsoleState =
@@ -54,6 +59,9 @@ export function useMarketAnalysis() {
   const [actionMessage, setActionMessage] = useState<string | null>(null)
   const [isWorking, setIsWorking] = useState(false)
   const [scannerMarkets, setScannerMarkets] = useState<readonly string[]>([])
+  const [availableMarkets, setAvailableMarkets] = useState<
+    readonly ActiveMarketSymbol[]
+  >([])
 
   useEffect(() => {
     void getAccountSession()
@@ -75,6 +83,13 @@ export function useMarketAnalysis() {
           data: null,
           message: 'Choose a market to begin a read-only tick subscription.'
         })
+        void getActiveSymbols()
+          .then(setAvailableMarkets)
+          .catch((error: unknown) => {
+            setActionMessage(
+              safeMessage(error, 'Unable to load Deriv active symbols.')
+            )
+          })
       })
       .catch((error: unknown) => {
         if (
@@ -115,6 +130,12 @@ export function useMarketAnalysis() {
       setActionMessage(null)
 
       try {
+        if (
+          state.status === 'success' &&
+          state.data.analysis.market !== market
+        ) {
+          await unsubscribeFromMarket(state.data.analysis.market)
+        }
         await subscribeToMarket(market)
         const analysis = await getMarketAnalysis(market, parameters)
         setState({
@@ -136,7 +157,7 @@ export function useMarketAnalysis() {
         setIsWorking(false)
       }
     },
-    [state.accountSession]
+    [state]
   )
 
   const refresh = useCallback(
@@ -215,13 +236,49 @@ export function useMarketAnalysis() {
     [state]
   )
 
+  const replay = useCallback(
+    async (market: string, ticks: readonly ReplayTickInput[]) => {
+      if (state.accountSession?.selectedAccountId === null) return
+      setIsWorking(true)
+      setActionMessage(null)
+      try {
+        await unsubscribeFromMarket(market)
+        const analysis = await replayMarket(market, ticks)
+        const accountSession = state.accountSession
+        if (
+          accountSession === null ||
+          accountSession.selectedAccountId === null
+        )
+          return
+        setState({
+          status: 'success',
+          accountSession,
+          data: {
+            accountSession,
+            selectedAccountId: accountSession.selectedAccountId,
+            analysis,
+            scanner: []
+          },
+          message: null
+        })
+      } catch (error: unknown) {
+        setActionMessage(safeMessage(error, 'Unable to replay the tick data.'))
+      } finally {
+        setIsWorking(false)
+      }
+    },
+    [state]
+  )
+
   return {
     state,
     actionMessage,
     isWorking,
+    availableMarkets,
     startMarket,
     refresh,
-    startScanner
+    startScanner,
+    replay
   }
 }
 
