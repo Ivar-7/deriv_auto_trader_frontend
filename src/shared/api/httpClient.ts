@@ -8,6 +8,8 @@ type ApiFailure = Readonly<{
   }>
 }>
 
+const readRequestTimeoutMilliseconds = 8_000
+
 export class ApiError extends Error {
   public readonly code: string
 
@@ -137,8 +139,25 @@ export async function requestWithRecovery(
   const attempts = isReadRequest ? 2 : 1
 
   for (let attempt = 0; attempt < attempts; attempt += 1) {
+    const controller =
+      isReadRequest && options.signal === undefined
+        ? new AbortController()
+        : null
+    const timeout =
+      controller === null
+        ? null
+        : globalThis.setTimeout(
+            () => controller.abort(),
+            readRequestTimeoutMilliseconds
+          )
+
     try {
-      const response = await fetch(url, options)
+      const response = await fetch(
+        url,
+        controller === null
+          ? options
+          : { ...options, signal: controller.signal }
+      )
 
       if (
         attempt === attempts - 1 ||
@@ -150,10 +169,14 @@ export async function requestWithRecovery(
       if (attempt === attempts - 1) {
         throw error
       }
+    } finally {
+      if (timeout !== null) {
+        globalThis.clearTimeout(timeout)
+      }
     }
 
     await new Promise<void>((resolve) => {
-      window.setTimeout(resolve, 700)
+      globalThis.setTimeout(resolve, 700)
     })
   }
 

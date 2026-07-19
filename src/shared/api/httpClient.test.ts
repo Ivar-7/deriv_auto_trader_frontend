@@ -14,12 +14,30 @@ describe('requestWithRecovery', () => {
       .mockResolvedValueOnce(new Response('{"data":{"ready":true}}'))
 
     vi.stubGlobal('fetch', fetchMock)
-    vi.stubGlobal('window', {
-      setTimeout: (callback: () => void) => {
-        callback()
-        return 0
-      }
+    vi.stubGlobal('setTimeout', (callback: () => void) => {
+      callback()
+      return 0
     })
+    vi.stubGlobal('clearTimeout', () => undefined)
+
+    const response = await requestWithRecovery('https://example.test/api', {})
+
+    expect(response.status).toBe(200)
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('retries a read request after a transport failure', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockRejectedValueOnce(new TypeError('network interrupted'))
+      .mockResolvedValueOnce(new Response('{"data":{"ready":true}}'))
+
+    vi.stubGlobal('fetch', fetchMock)
+    vi.stubGlobal('setTimeout', (callback: () => void) => {
+      callback()
+      return 0
+    })
+    vi.stubGlobal('clearTimeout', () => undefined)
 
     const response = await requestWithRecovery('https://example.test/api', {})
 
