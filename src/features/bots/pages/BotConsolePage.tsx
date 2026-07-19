@@ -151,7 +151,10 @@ export function BotConsolePage() {
       entryDelaySeconds: number('entryDelaySeconds'),
       martingale: {
         enabled: martingaleEnabled,
-        multiplier: text('multiplier'),
+        // Disabled form controls are omitted from FormData. Keep the valid
+        // inactive default instead of serializing the missing value as
+        // the literal string "null".
+        multiplier: optionalValue(values.get('multiplier')) ?? '2.00',
         maxSteps: number('maxSteps'),
         maxStake: optionalValue(values.get('maxStake')),
         resetAfterWin: values.get('resetAfterWin') === 'on',
