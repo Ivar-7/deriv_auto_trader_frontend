@@ -129,7 +129,7 @@ async function readJson(response: Response): Promise<unknown> {
   }
 }
 
-async function requestWithRecovery(
+export async function requestWithRecovery(
   url: string,
   options: Readonly<RequestInit>
 ): Promise<Response> {
