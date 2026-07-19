@@ -5,6 +5,9 @@ const retryableStatuses = new Set([502, 503, 504, 522])
 const requestTimeoutMilliseconds = 4_000
 
 export default async function handler(request, response) {
+  response.setHeader('cache-control', 'private, no-store')
+  response.setHeader('x-deriv-api-proxy', 'vercel-function')
+
   const method = request.method ?? 'GET'
   const body = requestBody(request, method)
   const headers = requestHeaders(request.headers)
