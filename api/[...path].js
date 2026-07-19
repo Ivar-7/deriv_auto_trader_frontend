@@ -2,7 +2,9 @@ const backendOrigin =
   process.env.BACKEND_API_ORIGIN ??
   'https://deriv-auto-trader-api-h44p4.ondigitalocean.app'
 const retryableStatuses = new Set([502, 503, 504, 522])
-const requestTimeoutMilliseconds = 4_000
+const requestTimeoutMilliseconds = 15_000
+
+export const config = { maxDuration: 30 }
 
 export default async function handler(request, response) {
   response.setHeader('cache-control', 'private, no-store')
@@ -62,7 +64,7 @@ function catchAllPath(value) {
 }
 
 async function forwardRequest(target, init) {
-  const attempts = ['GET', 'HEAD'].includes(init.method) ? 3 : 1
+  const attempts = isRetrySafeRequest(target, init.method) ? 3 : 1
 
   for (let attempt = 0; attempt < attempts; attempt += 1) {
     try {
@@ -75,6 +77,10 @@ async function forwardRequest(target, init) {
       try {
         const upstream = await fetch(target, {
           ...init,
+          // OAuth callback redirects must reach the browser. Following the
+          // redirect here serves the SPA at the callback URL instead, leaving
+          // React on an unknown route and making a successful login look dead.
+          redirect: 'manual',
           signal: controller.signal
         })
 
@@ -95,6 +101,14 @@ async function forwardRequest(target, init) {
   }
 
   return null
+}
+
+function isRetrySafeRequest(target, method) {
+  if (!['GET', 'HEAD'].includes(method)) return false
+
+  // The authorization code and state are single-use. Replaying this GET after
+  // the backend consumes them turns a successful callback into an expired one.
+  return target.pathname !== '/api/v1/auth/deriv/callback'
 }
 
 function requestHeaders(headers) {
@@ -144,3 +158,5 @@ function copyResponseHeaders(upstream, response) {
     response.setHeader('set-cookie', fallbackCookie)
   }
 }
+
+export { forwardRequest, isRetrySafeRequest }
