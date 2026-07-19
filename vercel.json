@@ -3,6 +3,10 @@
     {
       "source": "/api/:path*",
       "destination": "https://deriv-auto-trader-api-h44p4.ondigitalocean.app/api/:path*"
+    },
+    {
+      "source": "/:path*",
+      "destination": "/index.html"
     }
   ]
 }
