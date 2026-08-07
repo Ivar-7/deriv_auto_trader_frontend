@@ -1,6 +1,6 @@
 const backendOrigin =
   process.env.BACKEND_API_ORIGIN ??
-  'https://deriv-auto-trader-api-h44p4.ondigitalocean.app'
+  'https://deriv-autotrader-c432bf765d3c.herokuapp.com'
 const retryableStatuses = new Set([502, 503, 504, 522])
 const readRequestTimeoutMilliseconds = 8_000
 const writeRequestTimeoutMilliseconds = 15_000
